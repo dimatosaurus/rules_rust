@@ -182,6 +182,13 @@ impl TryFrom<HashMap<String, String>> for BazelInfo {
                         r = format!("{}-rc{}", v, c);
                     }
 
+                    // Force non tagged build to conform to semver.
+                    if r.contains("@non-git") {
+                        r = s.split_whitespace().nth(1).unwrap().to_owned();
+                        if r.ends_with("-") {
+                            r.pop();
+                        }
+                    }
                     semver::Version::parse(&r).context("Failed to parse release version")
                 })
                 .ok_or(anyhow!("Failed to query Bazel release"))??,
